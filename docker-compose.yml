@@ -1,39 +1,17 @@
-proxy:
-  image: jwilder/nginx-proxy:latest
-  ports:
-    - "80:80"
-  volumes:
-    - "/var/run/docker.sock:/tmp/docker.sock"
-db:
-  image: mysql:5.7.7
-  volumes:
-    - './data:/var/lib/mysql'
-  environment:
-    MYSQL_ROOT_PASSWORD: mypass
-redis:
-  image: redis
-cache:
-  image: memcached
 web:
   build: .
-  command: bundle exec puma -C config/puma.rb
-  environment:
-    SECRET_KEY_BASE: abcdefg
-    VIRTUAL_HOST: beer.docker
-    RAILS_ENV: production
-    MYSQL_ROOT_PASSWORD: mypass
+  volumes:
+    - .:/app
+  ports:
+    - "3000:3000"
   links:
     - db
     - redis
-    - cache
-worker:
-  build: .
-  command: bundle exec sidekiq -e production -c 25
+
+db:
+  image: library/mysql:5.6.22
   environment:
-    SECRET_KEY_BASE: abcdefg
-    RAILS_ENV: production
-    MYSQL_ROOT_PASSWORD: mypass
-  links:
-    - db
-    - redis
-    - cache
+    MYSQL_ROOT_PASSWORD: password # required by mysql image
+
+redis:
+  image: redis
